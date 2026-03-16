@@ -28,5 +28,3 @@ def init_db():
     # wrap up when done
     conn.commit()
     conn.close()
-
-    
