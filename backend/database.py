@@ -8,7 +8,7 @@ def get_db():
     return conn
 
 def init_db():
-    conn = get_db # get connection
+    conn = get_db() # get connection
 
     # build the table.
     # probably score 1, score 2? or an array

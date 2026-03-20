@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from database import init_db, get_db
 from models import player_stats, matchup_stats, game
 from pydantic import BaseModel
@@ -30,6 +30,8 @@ def add_game(game: GameInput):
 
     return {"message": "inserted a game!"}
 
+
+
 # delete game "id" from table in database (DELETE)
 @app.delete("/game/{id}")
 def delete_game(id: int):
@@ -38,11 +40,18 @@ def delete_game(id: int):
 
     cur.execute("DELETE FROM games WHERE id = ?", (id,))
 
+    # lets us know how many rows were affect, if its none that means nothing was deleted
+    if cur.rowcount == 0:
+        conn.close()
+        raise HTTPException (status_code=404, detail=f"game with id {id} not found")
+
     conn.commit()
     conn.close()
 
-    # f-string for variable
+    # if it got deleted successfully
     return {"message": f"deleted game with id: {id}"}
+
+
 
 # calculate and return player_stats (GET)
 @app.get("/player-stats")
@@ -54,23 +63,11 @@ def get_player_stats():
     cur.execute("SELECT * FROM games")
     rows = cur.fetchall()
 
-    player_stats_list = []
-    
-    # def player_stats():
-    #     return {
-    #         "player": "",
-    #         "wins": 0,
-    #         "losses": 0,
-    #         "games": 0, # redundant but fine. its ping pong
-    #         "winrate": 0.0,
-    #         "pointDiff": 0.0,
-    #         "pointsEarned": 0,
-    #         "pointsLost": 0,
-    #     }
-
     # use a dict of player_data keyed by player name
     player_data = {}
-    for row in rows: # each game
+
+    # go through each game
+    for row in rows:
 
         # get all info from database for easier manipulation
         player1 = row["player1"]
@@ -107,20 +104,6 @@ def get_player_stats():
             player_data[player1]["games"] += 1
             player_data[player2]["games"] += 1
 
-        # wins/losses for convenience
-        player1Wins = player_data[player1]["wins"]
-        player2Wins = player_data[player2]["wins"]
-
-        player1Games = player_data[player1]["games"]
-        player2Games = player_data[player2]["games"]
-
-
-
-        # update winrate
-        player_data[player1]["winrate"] = round((player1Wins / player1Games) * 100, 1) if player1Games > 0 else 0
-        player_data[player2]["winrate"] = round((player2Wins / player2Games) * 100, 1) if player2Games > 0 else 0
-
-
         # update pointsEarned and lost
         player_data[player1]["pointsEarned"] += score1
         player_data[player1]["pointsLost"] += score2
@@ -129,9 +112,21 @@ def get_player_stats():
         player_data[player2]["pointsEarned"] += score2
 
 
+    # update for stats that dont need to be incremented slowly
+    for player in player_data:
+        wins = player_data[player]["wins"]
+        games = player_data[player]["games"]
+        pointsEarned = player_data[player]["pointsEarned"]
+        pointsLost = player_data[player]["pointsLost"]
+
+        # update winrate
+        player_data[player]["winrate"] = round((wins / games) * 100, 1) if games > 0 else 0
+
         # update point diff
-        player_data[player1]["pointDiff"] = player_data[player1]["pointsEarned"] -  player_data[player1]["pointsLost"]
-        player_data[player2]["pointDiff"] = player_data[player2]["pointsEarned"] -  player_data[player2]["pointsLost"]
+        player_data[player]["pointDiff"] = pointsEarned -  pointsLost
+
+    # close the connection
+    conn.close()
             
     # return the list of the values, itll be packaged as a json
     return list(player_data.values())
