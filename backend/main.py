@@ -52,7 +52,7 @@ def get_player_stats():
 
     # get all the games
     cur.execute("SELECT * FROM games")
-    rows = cur.fetchall
+    rows = cur.fetchall()
 
     player_stats_list = []
     
@@ -107,25 +107,31 @@ def get_player_stats():
             player_data[player1]["games"] += 1
             player_data[player2]["games"] += 1
 
+        # wins/losses for convenience
+        player1Wins = player_data[player1]["wins"]
+        player2Wins = player_data[player2]["wins"]
+
+        player1Games = player_data[player1]["games"]
+        player2Games = player_data[player2]["games"]
+
+
 
         # update winrate
-        player_data[player1]["winrate"] = round((player_data[player1]["wins"] / player_data[player1]["games"]) * 100, 1) if player_data[player1]["games"] > 0 else 0
+        player_data[player1]["winrate"] = round((player1Wins / player1Games) * 100, 1) if player1Games > 0 else 0
+        player_data[player2]["winrate"] = round((player2Wins / player2Games) * 100, 1) if player2Games > 0 else 0
+
 
         # update pointsEarned and lost
-
-        # update point diff
-
-
-
         player_data[player1]["pointsEarned"] += score1
         player_data[player1]["pointsLost"] += score2
 
+        player_data[player2]["pointsLost"] += score1
+        player_data[player2]["pointsEarned"] += score2
 
 
-
-            # also update the matchup, but we are less worried about that for now
-
-
+        # update point diff
+        player_data[player1]["pointDiff"] = player_data[player1]["pointsEarned"] -  player_data[player1]["pointsLost"]
+        player_data[player2]["pointDiff"] = player_data[player2]["pointsEarned"] -  player_data[player2]["pointsLost"]
             
     # return the list of the values, itll be packaged as a json
     return list(player_data.values())
