@@ -3,7 +3,6 @@ import sqlite3
 def get_db():
     conn = sqlite3.connect('pingpong.db') # connection, make if not present
 
-    cursor = conn.cursor()
     conn.row_factory = sqlite3.Row # instead of returning tuples. return dictionary rows. makes things easier
 
     return conn

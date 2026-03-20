@@ -15,15 +15,20 @@ def player_stats():
         "wins": 0,
         "losses": 0,
         "games": 0, # redundant but fine. its ping pong
-        "pointdiff": 0.0,
+        "winrate": 0.0,
+        "pointDiff": 0,
+        "pointsEarned": 0,
+        "pointsLost": 0,
     }
 
 def matchup_stats():
     return {
         "player1": "",
         "player2": "",
-        "games": 0,
+        "games": 0, # redundant but fine. its ping pong
         "player1wins": 0,
-        "pointdiff": 0.0,
+        "pointDiff": 0,
+        "player1Points": 0,
+        "player2Points": 0,
     }
 
