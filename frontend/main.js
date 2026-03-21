@@ -44,6 +44,14 @@ async function submitGame(event) {
 
 }
 
+async function displayGames() {
+    const gamesWrapper = document.getElementById("games-wrapper");
+
+    const response = await fetch("http://127.0.0.1:8000/games");
+
+
+}
+
 // function to display players
 async function displayPlayers() {
     const playerStatsWrapper = document.getElementById("player-stats-wrapper");
@@ -60,12 +68,12 @@ async function displayPlayers() {
         card.id = `player-card-${index}`
 
         // simple plugin, but if pointDiff is negative dont add a plus. yay.
-        card.innerHTML= `
+        card.innerHTML = `
             <p><span>${player.player}</span> <span class="winrate">${player.winrate}%</span></p>
             <p>${player.wins} W / ${player.losses} L</p>
-            <p>${player.pointsEarned} Points Earned</p>
-            <p>${player.pointsLost} Points Lost</p>
-            <p><span class="point-diff">${player.pointDiff >= 0 ? "+" : ""}${player.pointDiff}</span> Point Differential</p>
+            <p>Points Earned: ${player.pointsEarned}</p>
+            <p>Points Lost: ${player.pointsLost}</p>
+            <p><span class="point-diff">Point Differential: ${player.pointDiff >= 0 ? "+" : ""} ${player.pointDiff}</span></p>
         `
 
         playerStatsWrapper.appendChild(card);
@@ -75,9 +83,46 @@ async function displayPlayers() {
     console.log(data);
 }
 
+async function displayMatchups() {
+    const matchupStatsWrapper = document.getElementById("matchup-stats-wrapper");
+
+    const response = await fetch("http://127.0.0.1:8000/matchup-stats")
+
+    const data = await response.json();
+
+    matchupStatsWrapper.innerHTML = ""
+
+        // "player1": "",
+        // "player2": "",
+        // "games": 0, # redundant but fine. its ping pong
+        // "player1Wins": 0,
+        // "player2Wins": 0, # we need both in case of ties
+        // "pointDiff": 0,
+        // "player1Points": 0,
+        // "player2Points": 0,
+
+    data.forEach((matchup, index) => {
+        const card = document.createElement("div");
+        card.id = `matchup-card-${index}`
+
+        // simple plugin, but if pointDiff is negative dont add a plus. yay.
+        card.innerHTML = `
+            <p>${matchup.player1} vs ${matchup.player2} - ${matchup.games} Games</p>
+            <p>Wins: ${matchup.player1Wins} W | ${matchup.player2Wins} W</p>
+            <p>Points: ${matchup.player1Points} | ${matchup.player2Points} </p>
+            <p>Point Differential: ${matchup.pointDiff >= 0 ? "+" : ""} ${matchup.pointDiff}</p>
+        `
+
+        matchupStatsWrapper.appendChild(card);
+    });
+
+    console.log(data);
+}
+
 // update the cards for players and matchups when the thing loads
 function updateCards() {
     displayPlayers();
+    displayMatchups();
 }
 
 // event listeners

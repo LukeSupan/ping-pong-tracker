@@ -27,6 +27,18 @@ class GameInput(BaseModel):
 # make db with tables we need
 init_db()
 
+# get games list
+@app.get("/game")
+def get_game():
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM games")
+
+    rows = cur.fetchall
+
+    # return a list of dicts with each row as a dict
+    return [dict(row) for row in rows]
 
 
 # insert game into the table in database (POST)
