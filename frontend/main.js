@@ -29,9 +29,6 @@ async function submitGame(event) {
     }),
   });
 
-  const data = await response.json();
-  console.log(data);
-
   // reset inputs
   player1Box.value = "";
   player2Box.value = "";
@@ -45,8 +42,7 @@ async function submitGame(event) {
 /*
  * display functions
  */
-
-// games section display
+// games section display TODO THIS
 async function displayGames() {
   const gamesWrapper = document.getElementById("games-wrapper");
 
@@ -128,4 +124,3 @@ updateCards();
  * event listeners
  */
 submitButton.addEventListener("click", submitGame);
-
