@@ -16,12 +16,13 @@ app.add_middleware(
 )
 
 # make a model with pydantic
+
+
 class GameInput(BaseModel):
     player1: str
     player2: str
     score1: int
     score2: int
-
 
 
 # make db with tables we need
@@ -47,14 +48,14 @@ def add_game(game: GameInput):
     conn = get_db()
     cur = conn.cursor()
 
-    cur.execute("INSERT INTO games (player1, player2, score1, score2) VALUES (?, ?, ?, ?)", (game.player1, game.player2, game.score1, game.score2))
+    cur.execute("INSERT INTO games (player1, player2, score1, score2) VALUES (?, ?, ?, ?)",
+                (game.player1, game.player2, game.score1, game.score2))
 
     # commit changes and close the connection
     conn.commit()
     conn.close()
 
     return {"message": "inserted a game!"}
-
 
 
 # delete game "id" from table in database (DELETE)
@@ -68,14 +69,14 @@ def delete_game(id: int):
     # lets us know how many rows were affect, if its none that means nothing was deleted
     if cur.rowcount == 0:
         conn.close()
-        raise HTTPException (status_code=404, detail=f"game with id {id} not found")
+        raise HTTPException(
+            status_code=404, detail=f"game with id {id} not found")
 
     conn.commit()
     conn.close()
 
     # if it got deleted successfully
     return {"message": f"deleted game with id: {id}"}
-
 
 
 # calculate and return player_stats (GET)
@@ -100,11 +101,11 @@ def get_player_stats():
         score1 = row["score1"]
         score2 = row["score2"]
 
-        if player1 not in player_data: # if player isnt in the dict already, make player_stats for them
+        if player1 not in player_data:  # if player isnt in the dict already, make player_stats for them
             player_data[player1] = player_stats()
             player_data[player1]["player"] = player1
 
-        if player2 not in player_data: # if player isnt in the dict already, make player_stats for them
+        if player2 not in player_data:  # if player isnt in the dict already, make player_stats for them
             player_data[player2] = player_stats()
             player_data[player2]["player"] = player2
 
@@ -122,7 +123,7 @@ def get_player_stats():
         elif score2 > score1:
             player_data[player2]["wins"] += 1
             player_data[player1]["losses"] += 1
-            
+
             player_data[player1]["games"] += 1
             player_data[player2]["games"] += 1
 
@@ -133,7 +134,6 @@ def get_player_stats():
         player_data[player2]["pointsLost"] += score1
         player_data[player2]["pointsEarned"] += score2
 
-
     # update for stats that dont need to be incremented on a per game basis
     for player in player_data:
         wins = player_data[player]["wins"]
@@ -142,18 +142,21 @@ def get_player_stats():
         pointsLost = player_data[player]["pointsLost"]
 
         # update winrate
-        player_data[player]["winrate"] = round((wins / games) * 100, 1) if games > 0 else 0
+        player_data[player]["winrate"] = round(
+            (wins / games) * 100, 1) if games > 0 else 0
 
         # update point diff
-        player_data[player]["pointDiff"] = pointsEarned -  pointsLost
+        player_data[player]["pointDiff"] = pointsEarned - pointsLost
 
     # close the connection
     conn.close()
-            
+
     # return the list of the values, itll be packaged as a json
     return list(player_data.values())
 
 # calculate and return matchup_stats (GET)
+
+
 @app.get("/matchup-stats")
 def get_matchup_stats():
     conn = get_db()
@@ -208,9 +211,9 @@ def get_matchup_stats():
 
     # point diff calculation at the end, more efficient
     for matchup in matchup_data:
-        matchup_data[matchup]["pointDiff"] = matchup_data[matchup]["player1Points"] - matchup_data[matchup]["player2Points"]
+        matchup_data[matchup]["pointDiff"] = matchup_data[matchup]["player1Points"] - \
+            matchup_data[matchup]["player2Points"]
 
-    
     # close the connection
     conn.close()
 
