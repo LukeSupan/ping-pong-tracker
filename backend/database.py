@@ -1,14 +1,17 @@
 import sqlite3
 
-def get_db():
-    conn = sqlite3.connect('pingpong.db') # connection, make if not present
 
-    conn.row_factory = sqlite3.Row # instead of returning tuples. return dictionary rows. makes things easier
+def get_db():
+    conn = sqlite3.connect('pingpong.db')  # connection, make if not present
+
+    # instead of returning tuples. return dictionary rows. makes things easier
+    conn.row_factory = sqlite3.Row
 
     return conn
 
+
 def init_db():
-    conn = get_db() # get connection
+    conn = get_db()  # get connection
 
     # build the table.
     # probably score 1, score 2? or an array
