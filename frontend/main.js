@@ -22,8 +22,8 @@ async function submitGame(event) {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ 
-            player1: player1Box.value, 
-            player2: player2Box.value, 
+            player1: player1Box.value.trim(), 
+            player2: player2Box.value.trim(), 
             score1: parseInt(score1Box.value), 
             score2: parseInt(score2Box.value)
         }),
@@ -40,7 +40,7 @@ async function submitGame(event) {
 
 
     // call displaying stats function
-    displayPlayers();
+    updateCards();
 
 }
 
@@ -75,13 +75,13 @@ async function displayPlayers() {
     console.log(data);
 }
 
-// updateCards
+// update the cards for players and matchups when the thing loads
 function updateCards() {
     displayPlayers();
 }
 
 // event listeners
-submitButton.addEventListener("click", submitGame)
+submitButton.addEventListener("click", submitGame);
 
 
 
