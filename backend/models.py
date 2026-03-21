@@ -1,14 +1,5 @@
 # models to pass to the json as dicts
 
-# each game has a model
-def game():
-    return {
-        "player1": "",
-        "player2": "",
-        "score1": 0,
-        "score2": 0, 
-    }
-
 def player_stats():
     return {
         "player": "",
@@ -26,9 +17,9 @@ def matchup_stats():
         "player1": "",
         "player2": "",
         "games": 0, # redundant but fine. its ping pong
-        "player1wins": 0,
+        "player1Wins": 0,
+        "player2Wins": 0, # we need both in case of ties
         "pointDiff": 0,
         "player1Points": 0,
         "player2Points": 0,
     }
-

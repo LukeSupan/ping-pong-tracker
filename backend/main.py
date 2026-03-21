@@ -1,9 +1,19 @@
 from fastapi import FastAPI, HTTPException
 from database import init_db, get_db
-from models import player_stats, matchup_stats, game
+from models import player_stats, matchup_stats
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 
+# fastAPI please!
 app = FastAPI()
+
+# middleware for frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # make a model with pydantic
 class GameInput(BaseModel):
@@ -12,8 +22,11 @@ class GameInput(BaseModel):
     score1: int
     score2: int
 
+
+
 # make db with tables we need
 init_db()
+
 
 
 # insert game into the table in database (POST)
@@ -83,12 +96,9 @@ def get_player_stats():
             player_data[player2] = player_stats()
             player_data[player2]["player"] = player2
 
-        # TODO YOU WERE GONNA MAKE WINS AND GAMES A VARIABLE FOR EASE OF USE AGAIN. ROCKET LEAGUE
-
-
         # update wins and losses based on score
-        # in the case of tie it doesnt increment wins or losses, but also you dont tie in ping pong. im just including the chance so it doesnt directly break this
-        # it does screw up winrates though if you always increment games, so i got rid of them.
+        # in the case of tie it doesnt increment wins, losses, or games. but also you dont tie in ping pong. im just including the chance so it doesnt directly break this
+        # it does screw up winrates and points though
         # just dont do ties. unless you really want to i guess.
         if score1 > score2:
             player_data[player1]["wins"] += 1
@@ -112,7 +122,7 @@ def get_player_stats():
         player_data[player2]["pointsEarned"] += score2
 
 
-    # update for stats that dont need to be incremented slowly
+    # update for stats that dont need to be incremented on a per game basis
     for player in player_data:
         wins = player_data[player]["wins"]
         games = player_data[player]["games"]
@@ -132,21 +142,65 @@ def get_player_stats():
     return list(player_data.values())
 
 # calculate and return matchup_stats (GET)
-@app.get("matchup-stats")
+@app.get("/matchup-stats")
 def get_matchup_stats():
     conn = get_db()
     cur = conn.cursor()
 
-    cur.execute("""
-                CREATE TABLE IF NOT EXISTS games (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    player1 TEXT,
-                    player2 TEXT,
-                    score1 INTEGER,
-                    score2 INTEGER
-                )
-    """)
+    # select the games
+    cur.execute("SELECT * FROM games")
 
+    # get rows from db
+    rows = cur.fetchall()
 
+    # dict of matchups keyed by a matchup tuple
+    matchup_data = {}
 
-    return {"message": "hello"}
+    for row in rows:
+
+        # sort tuple to always have the same matchup. then update the matchup key
+        matchup_key = tuple(sorted([row["player1"], row["player2"]]))
+
+        # save the players in correct order
+        player1 = matchup_key[0]
+        player2 = matchup_key[1]
+
+        # save scores properly (not sure the best way to do this but this works)
+        swapped = row["player1"] != player1
+        score1 = row["score2"] if swapped else row["score1"]
+        score2 = row["score1"] if swapped else row["score2"]
+
+        # add key to matchup_data if this matchup hasnt occured before
+        if matchup_key not in matchup_data:
+            matchup_data[matchup_key] = matchup_stats()
+            matchup_data[matchup_key]["player1"] = player1
+            matchup_data[matchup_key]["player2"] = player2
+
+        # update values (games, player1wins, player2wins, pointDiff after, player1points, player2points)
+
+        # update wins and losses based on score
+        # in the case of tie it doesnt increment wins, losses, or games. but also you dont tie in ping pong. im just including the chance so it doesnt directly break this
+        # it does screw up winrates and points though
+        # just dont do ties. unless you really want to i guess.
+        if score1 > score2:
+            matchup_data[matchup_key]["player1Wins"] += 1
+            matchup_data[matchup_key]["games"] += 1
+
+        elif score2 > score1:
+            matchup_data[matchup_key]["player2Wins"] += 1
+            matchup_data[matchup_key]["games"] += 1
+
+        # update total score
+        matchup_data[matchup_key]["player1Points"] += score1
+        matchup_data[matchup_key]["player2Points"] += score2
+
+    # point diff calculation at the end, more efficient
+    for matchup in matchup_data:
+        matchup_data[matchup]["pointDiff"] = matchup_data[matchup]["player1Points"] - matchup_data[matchup]["player2Points"]
+
+    
+    # close the connection
+    conn.close()
+
+    # return the matchup_data
+    return list(matchup_data.values())
