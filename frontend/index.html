@@ -1,28 +1,27 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
 
     <title>Ping Pong!</title>
-</head>
-<body>
+  </head>
+  <body>
     <!-- for now, player1 score1, player2 score2 submit form. thats all -->
-     <div>
-        <form>
-            <label for="player1">Player 1 Name and Score</label><br>
-            <input type="text" id="player1">
-            <input type="text" id="score1"><br>
+    <div>
+      <form>
+        <label for="player1">Player 1 Name and Score</label><br />
+        <input type="text" id="player1" />
+        <input type="text" id="score1" /><br />
 
-            <label for="player2">Player 2 Name and Score</label><br>
-            <input type="text" id="player2">
-            <input type="text" id="score2"><br><br> 
+        <label for="player2">Player 2 Name and Score</label><br />
+        <input type="text" id="player2" />
+        <input type="text" id="score2" /><br /><br />
 
-            <input type="submit" id="submit-game" value="Submit Game">
-        </form>
-     </div>
-
+        <input type="submit" id="submit-game" value="Submit Game" />
+      </form>
+    </div>
 
     <!-- player stats display -->
     <div id="player-stats-wrapper"></div>
@@ -31,5 +30,5 @@
     <div id="matchup-stats-wrapper"></div>
 
     <script src="main.js"></script>
-</body>
+  </body>
 </html>

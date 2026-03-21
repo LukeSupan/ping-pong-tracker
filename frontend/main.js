@@ -1,137 +1,131 @@
-// listen for submit button click
+/*
+ * DOM references
+ */
 const submitButton = document.getElementById("submit-game");
 
-updateCards();
-
-// function to submitGame
+/*
+ * main functionality
+ */
 async function submitGame(event) {
+  event.preventDefault();
 
-    event.preventDefault();
+  // player inputs
+  const player1Box = document.getElementById("player1");
+  const player2Box = document.getElementById("player2");
 
+  // score inputs
+  const score1Box = document.getElementById("score1");
+  const score2Box = document.getElementById("score2");
 
-    // player inputs
-    const player1Box = document.getElementById("player1");
-    const player2Box = document.getElementById("player2");
+  // post the game with the current values of the box
+  const response = await fetch("http://127.0.0.1:8000/game", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      player1: player1Box.value.trim(),
+      player2: player2Box.value.trim(),
+      score1: parseInt(score1Box.value),
+      score2: parseInt(score2Box.value),
+    }),
+  });
 
-    // score inputs
-    const score1Box = document.getElementById("score1");
-    const score2Box = document.getElementById("score2");
+  const data = await response.json();
+  console.log(data);
 
-    // post the game with the current values of the box
-    const response = await fetch("http://127.0.0.1:8000/game", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ 
-            player1: player1Box.value.trim(), 
-            player2: player2Box.value.trim(), 
-            score1: parseInt(score1Box.value), 
-            score2: parseInt(score2Box.value)
-        }),
-    });
+  // reset inputs
+  player1Box.value = "";
+  player2Box.value = "";
+  score1Box.value = "";
+  score2Box.value = "";
 
-    const data = await response.json();
-    console.log(data);
-
-    // reset inputs
-    player1Box.value = "";
-    player2Box.value = "";
-    score1Box.value = "";
-    score2Box.value = "";
-
-
-    // call displaying stats function
-    updateCards();
-
+  // call displaying stats function
+  updateCards();
 }
 
+/*
+ * display functions
+ */
+
+// games section display
 async function displayGames() {
-    const gamesWrapper = document.getElementById("games-wrapper");
+  const gamesWrapper = document.getElementById("games-wrapper");
 
-    const response = await fetch("http://127.0.0.1:8000/games");
-
-
+  const response = await fetch("http://127.0.0.1:8000/games");
 }
 
-// function to display players
+// player card section display
 async function displayPlayers() {
-    const playerStatsWrapper = document.getElementById("player-stats-wrapper");
+  const playerStatsWrapper = document.getElementById("player-stats-wrapper");
 
-    const response = await fetch("http://127.0.0.1:8000/player-stats");
+  const response = await fetch("http://127.0.0.1:8000/player-stats");
 
-    const data = await response.json();
+  const data = await response.json();
 
-    playerStatsWrapper.innerHTML = ""
+  playerStatsWrapper.innerHTML = "";
 
-    // each player is formatted
-    data.forEach((player, index) => {
-        const card = document.createElement("div");
-        card.id = `player-card-${index}`
+  // each player is formatted
+  data.forEach((player, index) => {
+    const card = document.createElement("div");
+    card.id = `player-card-${index}`;
 
-        // simple plugin, but if pointDiff is negative dont add a plus. yay.
-        card.innerHTML = `
+    // simple plugin, but if pointDiff is negative dont add a plus. yay.
+    card.innerHTML = `
             <p><span>${player.player}</span> <span class="winrate">${player.winrate}%</span></p>
             <p>${player.wins} W / ${player.losses} L</p>
             <p>Points Earned: ${player.pointsEarned}</p>
             <p>Points Lost: ${player.pointsLost}</p>
             <p><span class="point-diff">Point Differential: ${player.pointDiff >= 0 ? "+" : ""} ${player.pointDiff}</span></p>
-        `
+        `;
 
-        playerStatsWrapper.appendChild(card);
+    playerStatsWrapper.appendChild(card);
+  });
 
-    });
-
-    console.log(data);
+  console.log(data);
 }
 
+// matchup card section display
 async function displayMatchups() {
-    const matchupStatsWrapper = document.getElementById("matchup-stats-wrapper");
+  const matchupStatsWrapper = document.getElementById("matchup-stats-wrapper");
 
-    const response = await fetch("http://127.0.0.1:8000/matchup-stats")
+  const response = await fetch("http://127.0.0.1:8000/matchup-stats");
 
-    const data = await response.json();
+  const data = await response.json();
 
-    matchupStatsWrapper.innerHTML = ""
+  matchupStatsWrapper.innerHTML = "";
 
-        // "player1": "",
-        // "player2": "",
-        // "games": 0, # redundant but fine. its ping pong
-        // "player1Wins": 0,
-        // "player2Wins": 0, # we need both in case of ties
-        // "pointDiff": 0,
-        // "player1Points": 0,
-        // "player2Points": 0,
+  data.forEach((matchup, index) => {
+    const card = document.createElement("div");
+    card.id = `matchup-card-${index}`;
 
-    data.forEach((matchup, index) => {
-        const card = document.createElement("div");
-        card.id = `matchup-card-${index}`
-
-        // simple plugin, but if pointDiff is negative dont add a plus. yay.
-        card.innerHTML = `
+    // simple plugin, but if pointDiff is negative dont add a plus. yay.
+    card.innerHTML = `
             <p>${matchup.player1} vs ${matchup.player2} - ${matchup.games} Games</p>
             <p>Wins: ${matchup.player1Wins} W | ${matchup.player2Wins} W</p>
             <p>Points: ${matchup.player1Points} | ${matchup.player2Points} </p>
             <p>Point Differential: ${matchup.pointDiff >= 0 ? "+" : ""} ${matchup.pointDiff}</p>
-        `
+        `;
 
-        matchupStatsWrapper.appendChild(card);
-    });
+    matchupStatsWrapper.appendChild(card);
+  });
 
-    console.log(data);
+  console.log(data);
 }
 
-// update the cards for players and matchups when the thing loads
+/*
+ * helper functions
+ */
 function updateCards() {
-    displayPlayers();
-    displayMatchups();
+  displayPlayers();
+  displayMatchups();
 }
 
-// event listeners
+/*
+ * init
+ */
+updateCards();
+
+/*
+ * event listeners
+ */
 submitButton.addEventListener("click", submitGame);
 
-
-
-    // get values from the DOM (player1, player2, score1, score2)
-
-    // send them to the backend via fetch (POST /game)
-
-    // after success, refresh the stats displayed on the page
