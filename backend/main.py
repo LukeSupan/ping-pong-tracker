@@ -80,6 +80,17 @@ def delete_game(id: int):
     # if it got deleted successfully
     return {"message": f"deleted game with id: {id}"}
 
+# TODO put endpoint for update
+# TODO frontend save button for each row
+# TODO(stretch) edit mode to enable or disable edit
+# probably would be best to just get it over with and go to css
+@app.put("/game/{id}")
+def put_game():
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute()
+
 
 # calculate and return player_stats (GET)
 @app.get("/player-stats")
