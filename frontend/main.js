@@ -1,3 +1,5 @@
+const { createElement } = require("react");
+
 /*
  * DOM references
  */
@@ -42,11 +44,23 @@ async function submitGame(event) {
 /*
  * display functions
  */
-// games section display TODO THIS
+// games section display
 async function displayGames() {
   const gamesWrapper = document.getElementById("games-wrapper");
 
   const response = await fetch("http://127.0.0.1:8000/games");
+
+  const data = await response.json();
+
+  // loop through data, make an element for each in the wrapper, make a delete button, give it a listener to delete the game with this id
+  data.forEach((game, index) => {
+    
+    const gameRow = createElement("div");
+    
+    // make a row of the info with a text box for each so they can be edited later maybe? more now set as readonly
+    // then a delete button at the end
+
+  });
 }
 
 // player card section display
