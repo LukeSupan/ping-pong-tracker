@@ -36,7 +36,7 @@ def get_game():
 
     cur.execute("SELECT * FROM games")
 
-    rows = cur.fetchall
+    rows = cur.fetchall()
 
     conn.close()
 

@@ -1,5 +1,3 @@
-const { createElement } = require("react");
-
 /*
  * DOM references
  */
@@ -48,18 +46,35 @@ async function submitGame(event) {
 async function displayGames() {
   const gamesWrapper = document.getElementById("games-wrapper");
 
-  const response = await fetch("http://127.0.0.1:8000/games");
+  const response = await fetch("http://127.0.0.1:8000/game");
 
   const data = await response.json();
 
+  gamesWrapper.innerHTML = ""
+
   // loop through data, make an element for each in the wrapper, make a delete button, give it a listener to delete the game with this id
-  data.forEach((game, index) => {
-    
-    const gameRow = createElement("div");
-    
+  data.forEach((game) => {
+    const gameRow = document.createElement("div");
+
+    gameRow.id = `game-${game.id}`;
+
+    gameRow.innerHTML = `
+          <input type="text" value="${game.player1}" readonly>
+          <input type="text" value="${game.score1}" readonly>
+          <input type="text" value="${game.player2}" readonly>
+          <input type="text" value="${game.score2}" readonly>
+
+          <button id="delete-button-${game.id}">Delete</button>
+    `;
+
+    gamesWrapper.appendChild(gameRow);
+
+    // get the delete button and have it delete the game with this id on click
+    const deleteButton = gameRow.querySelector("button");
+    deleteButton.addEventListener("click", () => deleteGame(game.id));
+
     // make a row of the info with a text box for each so they can be edited later maybe? more now set as readonly
     // then a delete button at the end
-
   });
 }
 
@@ -125,8 +140,18 @@ async function displayMatchups() {
  * helper functions
  */
 function updateCards() {
+  displayGames();
   displayPlayers();
   displayMatchups();
+}
+
+async function deleteGame(id) {
+  const response = await fetch(`http://127.0.0.1:8000/game/${id}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  updateCards();
 }
 
 /*
