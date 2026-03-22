@@ -50,7 +50,7 @@ async function displayGames() {
 
   const data = await response.json();
 
-  gamesWrapper.innerHTML = ""
+  gamesWrapper.innerHTML = "";
 
   // loop through data, make an element for each in the wrapper, make a delete button, give it a listener to delete the game with this id
   data.forEach((game) => {

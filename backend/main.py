@@ -28,7 +28,7 @@ class GameInput(BaseModel):
 # make db with tables we need
 init_db()
 
-# get games list TODO make sure this is all good, should be
+# get games list
 @app.get("/game")
 def get_game():
     conn = get_db()
@@ -85,11 +85,21 @@ def delete_game(id: int):
 # TODO(stretch) edit mode to enable or disable edit
 # probably would be best to just get it over with and go to css
 @app.put("/game/{id}")
-def put_game():
+def put_game(id: int, game: GameInput):
     conn = get_db()
     cur = conn.cursor()
 
-    cur.execute()
+    cur.execute("UPDATE games SET player1 = ?, player2 = ?, score1 = ?, score2 = ? WHERE id = ?", (game.player1, game.player2, game.score1, game.score2, id))
+
+    if cur.rowcount == 0:
+        conn.close()
+        raise HTTPException(status_code=404, detail=f"game with id {id} not found")
+
+    conn.commit()
+    conn.close()
+
+    return {"message": f"updated game with id: {id}"}
+
 
 
 # calculate and return player_stats (GET)
