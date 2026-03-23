@@ -65,13 +65,17 @@ async function displayGames() {
           <input type="text" value="${game.score2}" readonly>
 
           <button id="delete-button-${game.id}">Delete</button>
+          <button id="edit-button-${game.id}">Edit</button>
     `;
 
     gamesWrapper.appendChild(gameRow);
 
     // get the delete button and have it delete the game with this id on click
-    const deleteButton = gameRow.querySelector("button");
+    const deleteButton = gameRow.getElementById(`delete-button-${game.id}`);
     deleteButton.addEventListener("click", () => deleteGame(game.id));
+
+    const editButton = gameRow.getElementById(`edit-button-${game.id}`);
+    editButton.addEventListener("click", () => editGame(game.id));
 
     // make a row of the info with a text box for each so they can be edited later maybe? more now set as readonly
     // then a delete button at the end
@@ -139,12 +143,15 @@ async function displayMatchups() {
 /*
  * helper functions
  */
+
+// refresh the page basically
 function updateCards() {
   displayGames();
   displayPlayers();
   displayMatchups();
 }
 
+// delete game with this id
 async function deleteGame(id) {
   const response = await fetch(`http://127.0.0.1:8000/game/${id}`, {
     method: "DELETE",
@@ -154,6 +161,28 @@ async function deleteGame(id) {
   updateCards();
 }
 
+// put edit mode on the game with this id
+async function editGame(id) {
+  // take the gamesWrapper and edit the html
+  const gamesWrapper = document.getElementById("games-wrapper");
+
+
+
+  updateCards();
+}
+
+// save the game with this id
+async function saveGame(id) {
+  const response = await fetch(`http://127.0.0.1:8000/game/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+  });
+
+
+
+
+  updateCards();
+}
 /*
  * init
  */
